@@ -91,13 +91,13 @@
             <tr>
               <th>序号</th>
               <th>姓名</th>
-              <th>性别</th>
-              <th>年龄</th>
+              <th class="col-secondary">性别</th>
+              <th class="col-secondary">年龄</th>
               <th class="th-score">总分</th>
-              <th>语文</th>
-              <th>数学</th>
-              <th>英语</th>
-              <th>身份证号</th>
+              <th class="col-secondary">语文</th>
+              <th class="col-secondary">数学</th>
+              <th class="col-secondary">英语</th>
+              <th class="col-secondary">身份证号</th>
               <th>考号</th>
               <th v-if="selectedGroup">状态</th>
             </tr>
@@ -110,13 +110,13 @@
             >
               <td>{{ i + 1 + (page - 1) * pageSize }}</td>
               <td>{{ s.name }}</td>
-              <td>{{ s.gender }}</td>
-              <td>{{ s.age }}</td>
+              <td class="col-secondary">{{ s.gender }}</td>
+              <td class="col-secondary">{{ s.age }}</td>
               <td class="th-score">{{ s.totalScore }}</td>
-              <td>{{ s.chinese }}</td>
-              <td>{{ s.math }}</td>
-              <td>{{ s.english }}</td>
-              <td class="td-mono">{{ s.idCard }}</td>
+              <td class="col-secondary">{{ s.chinese }}</td>
+              <td class="col-secondary">{{ s.math }}</td>
+              <td class="col-secondary">{{ s.english }}</td>
+              <td class="col-secondary td-mono">{{ s.idCard }}</td>
               <td class="td-mono">{{ s.examNo }}</td>
               <td v-if="selectedGroup">
                 <span
@@ -597,6 +597,36 @@ onMounted(async () => {
     &:hover:not(:disabled) {
       background: #f8fafc;
     }
+  }
+}
+
+/* ===== 移动端 (<768px) ===== */
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.25rem;
+  }
+
+  /* 概览卡片：缩小最小宽度，让一行能放 2 张 */
+  .overview {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.5rem;
+  }
+
+  /* 表格：隐藏次要列（性别/年龄/语文/数学/英语/身份证号）
+     保留 序号/姓名/总分/考号/状态，仍可横向滚动查看隐藏列 */
+  .col-secondary {
+    display: none;
+  }
+
+  /* 表头/单元格内边距收窄 */
+  .data-table th,
+  .data-table td {
+    padding: 0.45rem 0.6rem;
+  }
+
+  /* 筛选输入框：窄屏收窄最小宽度，避免单行被撑开 */
+  .input-sm {
+    min-width: 100px;
   }
 }
 </style>

@@ -26,4 +26,11 @@ import AppHeader from '@/components/AppHeader.vue'
   width: 100%;
   margin: 0 auto;
 }
+
+/* 移动端：主区两侧 padding 收窄，留出更多内容空间 */
+@media (max-width: 768px) {
+  .app-main {
+    padding: 1rem;
+  }
+}
 </style>

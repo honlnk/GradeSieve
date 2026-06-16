@@ -21,6 +21,8 @@ body {
     Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   background-color: var(--color-bg);
   color: #1e293b;
+  /* 防止 iOS 横屏时字号自动放大 */
+  -webkit-text-size-adjust: 100%;
 }
 
 /* ===== 滚动条美化 ===== */
@@ -36,4 +38,13 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* ===== 移动端 (<768px) ===== */
+@media (max-width: 768px) {
+  /* 手机上滚动条更细，减少对内容的遮挡 */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
 }

@@ -598,4 +598,30 @@ if (!inited.value) {
     }
   }
 }
+
+/* ===== 移动端 (<768px) ===== */
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.25rem;
+  }
+
+  /* 规则行：窄屏允许换行，避免 hint 文字挤压 */
+  .rule-row {
+    flex-wrap: wrap;
+  }
+
+  /* 卡片内边距收窄 */
+  .card-header {
+    padding: 0.85rem 1rem;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  /* 学校卡片内边距收窄 */
+  .group-block {
+    padding: 0.85rem 0.9rem;
+  }
+}
 </style>

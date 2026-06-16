@@ -87,4 +87,34 @@ import Icon from '@/components/Icon.vue'
     color: #fff;
   }
 }
+
+/* ===== 移动端 (<768px)：精简顶栏 ===== */
+@media (max-width: 768px) {
+  .header-inner {
+    padding: 0 0.75rem;
+    height: 50px;
+  }
+
+  .brand {
+    gap: 0.35rem;
+
+    &-text {
+      font-size: 1rem;
+    }
+
+    /* 隐藏副标题，避免与导航项挤在一行 */
+    &-sub {
+      display: none;
+    }
+  }
+
+  .nav {
+    gap: 0.125rem;
+  }
+
+  .nav-link {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.82rem;
+  }
+}
 </style>
