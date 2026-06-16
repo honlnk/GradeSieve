@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>GradeSieve</title>
+    <!--
+      GitHub Pages SPA fallback。
+      GitHub Pages 在找不到对应文件时会返回本 404.html（HTTP 200）。
+      这里把当前路径写进 sessionStorage，再跳回 index.html；
+      index.html 里的脚本会读出该路径并恢复路由。
+      详见 Vue Router 官方部署文档：
+      https://router.vuejs.org/zh/guide/eco/github-pages.html
+    -->
+    <script>
+      // 兼容 Segment Count Prefix 的情况：剥离 base 前缀
+      var pathSegmentsToKeep = 0
+
+      var l = window.location
+      var repoBase = (l.origin + l.pathname).split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/'
+
+      sessionStorage.setItem('spa-fallback-target', l.pathname.slice(repoBase.length) + l.search + l.hash)
+      l.replace(repoBase)
+    </script>
+  </head>
+  <body>
+    正在跳转...
+  </body>
+</html>

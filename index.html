@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GradeSieve 成绩筛分系统</title>
+    <!-- GitHub Pages SPA fallback：恢复 404.html 存下的目标路径 -->
+    <script>
+      (function () {
+        var target = sessionStorage.getItem('spa-fallback-target')
+        if (target) {
+          sessionStorage.removeItem('spa-fallback-target')
+          // 用 history.replaceState 把地址栏改回目标路径，再交由 Vue Router 处理
+          history.replaceState(null, '', target)
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>
