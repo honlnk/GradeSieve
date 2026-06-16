@@ -43,9 +43,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        # 注入 base 路径为 GitHub Pages 子路径
-        env:
-          BASE_PATH: /GradeSieve/
+        # 自定义域名（grade.honlnk.com）为根路径访问，base 用 '/'
+        # 若改回 GitHub Pages 默认子路径，需设置 env: BASE_PATH=/GradeSieve/
         run: pnpm build
 
       - name: Setup Pages
