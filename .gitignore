@@ -26,4 +26,4 @@ dist-ssr
 *.sw?
 
 # 本地测试数据（由 scripts/gen-sample-data.mjs 生成）
-test-data.xlsx
+test-data*.xlsx
