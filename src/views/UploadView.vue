@@ -1,13 +1,17 @@
 <template>
-  <div class="page">
-    <h1 class="title">数据导入</h1>
-    <p class="desc">
+  <div class="max-w-[760px] mx-auto">
+    <h1 class="text-[1.5rem] font-bold text-slate-900 mb-1">数据导入</h1>
+    <p class="text-slate-500 text-sm mb-6">
       上传一份完整的考生成绩表（.xlsx / .csv）。导入后会覆盖本地现有数据。
     </p>
 
     <div
-      class="dropzone"
-      :class="{ dragging, disabled: importing }"
+      class="border-2 border-dashed border-slate-300 rounded-xl py-12 px-6 text-center
+             cursor-pointer transition-all bg-white hover:border-blue-600 hover:bg-slate-50"
+      :class="{
+        'border-blue-600 bg-blue-50': dragging,
+        'opacity-60 cursor-not-allowed': importing,
+      }"
       @click="triggerPick"
       @dragover.prevent="dragging = true"
       @dragleave.prevent="dragging = false"
@@ -17,59 +21,77 @@
         ref="fileInput"
         type="file"
         accept=".xlsx,.xls,.csv"
-        class="hidden-input"
+        class="hidden"
         @change="onPick"
       />
-      <div v-if="!importing" class="dropzone-content">
-        <div class="upload-icon">
+      <div v-if="!importing" class="flex flex-col items-center gap-2">
+        <div class="text-slate-400 inline-flex">
           <Icon name="upload" :size="40" :stroke-width="1.5" />
         </div>
-        <div class="upload-text">
-          点击选择文件，或拖拽文件到此处
-        </div>
-        <div class="upload-hint">支持 .xlsx / .xls / .csv</div>
+        <div class="text-base text-slate-700">点击选择文件，或拖拽文件到此处</div>
+        <div class="text-xs text-slate-400">支持 .xlsx / .xls / .csv</div>
       </div>
-      <div v-else class="dropzone-content">
-        <div class="spinner" />
-        <div class="upload-text">正在导入...</div>
+      <div v-else class="flex flex-col items-center gap-2">
+        <div
+          class="h-7 w-7 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin"
+        />
+        <div class="text-base text-slate-700">正在导入...</div>
       </div>
     </div>
 
-    <div v-if="message" class="message" :class="messageType">
+    <div
+      v-if="message"
+      class="mt-4 px-4 py-3 rounded-lg text-sm"
+      :class="
+        messageType === 'success'
+          ? 'bg-green-50 text-green-800 border border-green-200'
+          : 'bg-red-50 text-red-800 border border-red-200'
+      "
+    >
       {{ message }}
     </div>
 
-    <div v-if="missingFields.length" class="warnings">
-      <div class="warnings-title">
+    <div
+      v-if="missingFields.length"
+      class="mt-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-[0.85rem] text-amber-700"
+    >
+      <div class="font-semibold flex items-center gap-1.5">
         <Icon name="alert" :size="16" /> 以下行存在问题（已用默认值填充）：
       </div>
-      <ul>
-        <li v-for="(w, i) in missingFields.slice(0, 10)" :key="i">{{ w }}</li>
+      <ul class="mt-2 pl-5">
+        <li v-for="(w, i) in missingFields.slice(0, 10)" :key="i" class="my-[0.15rem]">
+          {{ w }}
+        </li>
       </ul>
-      <div v-if="missingFields.length > 10" class="warnings-more">
+      <div v-if="missingFields.length > 10" class="mt-1 text-amber-600">
         ……共 {{ missingFields.length }} 处
       </div>
     </div>
 
-    <div v-if="studentStore.count > 0" class="status-card">
-      <div class="status-row">
-        <div class="status-item">
-          <div class="status-label">当前本地数据</div>
-          <div class="status-value">{{ studentStore.count }} 条考生记录</div>
+    <div
+      v-if="studentStore.count > 0"
+      class="mt-6 p-5 bg-white border border-slate-200 rounded-[10px]"
+    >
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <div class="text-xs text-slate-500">当前本地数据</div>
+          <div class="text-base font-semibold text-slate-900 mt-[0.15rem]">
+            {{ studentStore.count }} 条考生记录
+          </div>
         </div>
-        <button class="btn btn-danger-outline" @click="onClear">
-          清空本地数据
-        </button>
+        <button class="btn btn-danger-outline" @click="onClear">清空本地数据</button>
       </div>
-      <div class="status-actions">
+      <div class="mt-4 flex gap-3 flex-wrap">
         <RouterLink to="/data" class="btn btn-primary">查看数据 →</RouterLink>
         <RouterLink to="/config" class="btn btn-outline">前往配置</RouterLink>
       </div>
     </div>
 
-    <div class="format-hint">
-      <div class="format-title">期望的表头格式：</div>
-      <code>排名、姓名、性别、年龄、总分、语文、数学、英语、身份证号、考号</code>
+    <div class="mt-6 px-4 py-3 bg-slate-100 rounded-lg text-[0.85rem] text-slate-600">
+      <div class="font-medium">期望的表头格式：</div>
+      <code class="block mt-1.5 text-slate-900 break-all">
+        排名、姓名、性别、年龄、总分、语文、数学、英语、身份证号、考号
+      </code>
     </div>
   </div>
 </template>
@@ -139,234 +161,3 @@ async function onClear() {
   messageType.value = 'success'
 }
 </script>
-
-<style scoped lang="scss">
-.page {
-  max-width: 760px;
-  margin: 0 auto;
-}
-
-.title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 0.25rem;
-}
-
-.desc {
-  color: #64748b;
-  font-size: 0.9rem;
-  margin: 0 0 1.5rem;
-}
-
-.dropzone {
-  border: 2px dashed #cbd5e1;
-  border-radius: 12px;
-  padding: 3rem 1.5rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.15s;
-  background: #fff;
-
-  &:hover {
-    border-color: var(--color-primary);
-    background: #f8FAFC;
-  }
-
-  &.dragging {
-    border-color: var(--color-primary);
-    background: #eff6ff;
-  }
-
-  &.disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.hidden-input {
-  display: none;
-}
-
-.dropzone-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.upload-icon {
-  color: #94a3b8;
-  display: inline-flex;
-}
-
-.upload-text {
-  font-size: 1rem;
-  color: #334155;
-}
-
-.upload-hint {
-  font-size: 0.8rem;
-  color: #94a3b8;
-}
-
-.spinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid #e2e8f0;
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.message {
-  margin-top: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-
-  &.success {
-    background: #ecfdf5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
-  }
-
-  &.error {
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-  }
-}
-
-.warnings {
-  margin-top: 1rem;
-  padding: 0.75rem 1rem;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  color: #92400e;
-
-  ul {
-    margin: 0.5rem 0 0;
-    padding-left: 1.25rem;
-  }
-
-  li {
-    margin: 0.15rem 0;
-  }
-
-  &-title {
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  &-more {
-    margin-top: 0.25rem;
-    color: #b45309;
-  }
-}
-
-.status-card {
-  margin-top: 1.5rem;
-  padding: 1.25rem;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-}
-
-.status-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.status-label {
-  font-size: 0.8rem;
-  color: #64748b;
-}
-
-.status-value {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #0f172a;
-  margin-top: 0.15rem;
-}
-
-.status-actions {
-  margin-top: 1rem;
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.format-hint {
-  margin-top: 1.5rem;
-  padding: 0.75rem 1rem;
-  background: #f1f5f9;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  color: #475569;
-
-  code {
-    display: block;
-    margin-top: 0.4rem;
-    color: #0f172a;
-    word-break: break-all;
-  }
-}
-
-// ===== 通用按钮样式 =====
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  text-decoration: none;
-  transition: all 0.15s;
-
-  &-primary {
-    background: var(--color-primary);
-    color: #fff;
-
-    &:hover {
-      background: #1d4ed8;
-    }
-  }
-
-  &-outline {
-    background: #fff;
-    color: #334155;
-    border: 1px solid #cbd5e1;
-
-    &:hover {
-      background: #f8fafc;
-      border-color: #94a3b8;
-    }
-  }
-
-  &-danger-outline {
-    background: #fff;
-    color: #dc2626;
-    border: 1px solid #fecaca;
-
-    &:hover {
-      background: #fef2f2;
-    }
-  }
-}
-</style>

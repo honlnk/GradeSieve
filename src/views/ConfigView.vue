@@ -1,7 +1,9 @@
 <template>
-  <div class="page">
-    <h1 class="title">招生配置</h1>
-    <p class="desc">
+  <div class="max-w-[960px] mx-auto">
+    <h1 class="text-[1.5rem] font-bold text-slate-900 m-0 max-md:text-[1.25rem]">
+      招生配置
+    </h1>
+    <p class="text-slate-500 text-[0.88rem] mt-1 mb-6 m-0">
       配置目标学校（分组）、专业名额与分数规则。数据保存在本地浏览器。
     </p>
 
@@ -11,23 +13,23 @@
         <h2 class="card-title">分数规则</h2>
       </div>
       <div class="card-body">
-        <div class="rule-row">
-          <label class="rule-label">总分下限</label>
+        <div class="flex items-center gap-3 py-1.5 max-md:flex-wrap">
+          <label class="w-[100px] text-[0.9rem] text-slate-600">总分下限</label>
           <input
             v-model.number="ruleForm.minTotalScore"
             type="number"
-            class="input input-sm"
+            class="input max-w-[120px]"
             min="0"
             @change="saveRule"
           />
-          <span class="rule-hint">低于此分数的考生将被过滤</span>
+          <span class="text-[0.8rem] text-slate-400">低于此分数的考生将被过滤</span>
         </div>
-        <div class="rule-row">
-          <label class="rule-label">排序优先级</label>
-          <span class="rule-priority">
-            {{ rulePriorityLabel }}
+        <div class="flex items-center gap-3 py-1.5 max-md:flex-wrap">
+          <label class="w-[100px] text-[0.9rem] text-slate-600">排序优先级</label>
+          <span class="font-semibold text-blue-600">{{ rulePriorityLabel }}</span>
+          <span class="text-[0.8rem] text-slate-400">
+            （总分 → 语文 → 数学 → 英语，暂不支持调整）
           </span>
-          <span class="rule-hint">（总分 → 语文 → 数学 → 英语，暂不支持调整）</span>
         </div>
       </div>
     </section>
@@ -41,16 +43,20 @@
         </button>
       </div>
       <div class="card-body">
-        <div v-if="!config.groups.length" class="empty">
+        <div v-if="!config.groups.length" class="text-center text-slate-400 py-8 text-[0.9rem]">
           还没有目标学校，点击右上角新增。
         </div>
-        <div v-for="g in config.groups" :key="g.id" class="group-block">
-          <div class="group-head">
-            <div class="group-title">
-              <span class="group-name">{{ g.name }}</span>
+        <div
+          v-for="g in config.groups"
+          :key="g.id"
+          class="border border-slate-200 rounded-[10px] p-4 px-[1.1rem] mb-4 last:mb-0 max-md:p-[0.85rem_0.9rem]"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="font-semibold text-slate-900 text-base">{{ g.name }}</span>
               <span class="badge">目标 {{ g.targetCount }} 人</span>
             </div>
-            <div class="group-actions">
+            <div class="flex gap-1.5">
               <button class="btn btn-outline btn-xs" @click="openGroupDialog(g)">
                 编辑
               </button>
@@ -61,24 +67,27 @@
           </div>
 
           <!-- 专业列表 -->
-          <div class="major-area">
-            <div class="major-head">
-              <span class="major-title">专业与名额</span>
+          <div class="mt-[0.85rem]">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[0.85rem] text-slate-500">专业与名额</span>
               <button class="btn btn-outline btn-xs" @click="openMajorDialog(g)">
                 + 添加专业
               </button>
             </div>
-            <div v-if="!config.majorsOfGroup(g.id!).length" class="major-empty">
+            <div
+              v-if="!config.majorsOfGroup(g.id!).length"
+              class="text-[0.85rem] text-slate-400 py-2"
+            >
               暂无专业
             </div>
-            <div class="major-grid">
+            <div class="flex flex-wrap gap-2">
               <div
                 v-for="m in config.majorsOfGroup(g.id!)"
                 :key="m.id"
-                class="major-item"
+                class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-[0.85rem]"
               >
-                <span class="major-name">{{ m.name }}</span>
-                <span class="major-quota">{{ m.quota }} 人</span>
+                <span class="text-slate-800">{{ m.name }}</span>
+                <span class="text-slate-500">{{ m.quota }} 人</span>
                 <button
                   class="icon-btn"
                   title="编辑"
@@ -101,17 +110,21 @@
     </section>
 
     <!-- 学校编辑弹窗 -->
-    <div v-if="groupDialog.visible" class="modal-mask" @mousedown.self="groupDialog.visible = false">
-      <div class="modal">
-        <div class="modal-title">
+    <div
+      v-if="groupDialog.visible"
+      class="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50"
+      @mousedown.self="groupDialog.visible = false"
+    >
+      <div class="bg-white rounded-xl p-6 w-[90%] max-w-[420px]">
+        <div class="text-[1.1rem] font-semibold text-slate-900 mb-4">
           {{ groupDialog.id ? '编辑学校' : '新增学校' }}
         </div>
-        <div class="form-row">
-          <label class="form-label">学校名称</label>
+        <div class="mb-[0.9rem]">
+          <label class="block text-[0.85rem] text-slate-600 mb-1.5">学校名称</label>
           <input v-model="groupDialog.name" class="input" placeholder="如：北京大学" />
         </div>
-        <div class="form-row">
-          <label class="form-label">招收目标人数</label>
+        <div class="mb-[0.9rem]">
+          <label class="block text-[0.85rem] text-slate-600 mb-1.5">招收目标人数</label>
           <input
             v-model.number="groupDialog.targetCount"
             type="number"
@@ -119,11 +132,11 @@
             class="input"
           />
         </div>
-        <div class="form-row">
-          <label class="form-label">备注</label>
+        <div class="mb-[0.9rem]">
+          <label class="block text-[0.85rem] text-slate-600 mb-1.5">备注</label>
           <input v-model="groupDialog.remark" class="input" placeholder="选填" />
         </div>
-        <div class="modal-actions">
+        <div class="flex justify-end gap-2 mt-2">
           <button class="btn btn-outline" @click="groupDialog.visible = false">
             取消
           </button>
@@ -133,17 +146,21 @@
     </div>
 
     <!-- 专业编辑弹窗 -->
-    <div v-if="majorDialog.visible" class="modal-mask" @mousedown.self="majorDialog.visible = false">
-      <div class="modal">
-        <div class="modal-title">
+    <div
+      v-if="majorDialog.visible"
+      class="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50"
+      @mousedown.self="majorDialog.visible = false"
+    >
+      <div class="bg-white rounded-xl p-6 w-[90%] max-w-[420px]">
+        <div class="text-[1.1rem] font-semibold text-slate-900 mb-4">
           {{ majorDialog.id ? '编辑专业' : '新增专业' }}
         </div>
-        <div class="form-row">
-          <label class="form-label">专业名称</label>
+        <div class="mb-[0.9rem]">
+          <label class="block text-[0.85rem] text-slate-600 mb-1.5">专业名称</label>
           <input v-model="majorDialog.name" class="input" placeholder="如：计算机" />
         </div>
-        <div class="form-row">
-          <label class="form-label">招收人数</label>
+        <div class="mb-[0.9rem]">
+          <label class="block text-[0.85rem] text-slate-600 mb-1.5">招收人数</label>
           <input
             v-model.number="majorDialog.quota"
             type="number"
@@ -151,7 +168,7 @@
             class="input"
           />
         </div>
-        <div class="modal-actions">
+        <div class="flex justify-end gap-2 mt-2">
           <button class="btn btn-outline" @click="majorDialog.visible = false">
             取消
           </button>
@@ -298,330 +315,3 @@ if (!inited.value) {
   })
 }
 </script>
-
-<style scoped lang="scss">
-.page {
-  max-width: 960px;
-  margin: 0 auto;
-}
-
-.title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 0.25rem;
-}
-
-.desc {
-  color: #64748b;
-  font-size: 0.9rem;
-  margin: 0 0 1.5rem;
-}
-
-.card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  margin-bottom: 1.25rem;
-  overflow: hidden;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.card-title {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0;
-}
-
-.card-body {
-  padding: 1.25rem;
-}
-
-.rule-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.4rem 0;
-}
-
-.rule-label {
-  width: 100px;
-  font-size: 0.9rem;
-  color: #475569;
-}
-
-.rule-priority {
-  font-weight: 600;
-  color: var(--color-primary);
-}
-
-.rule-hint {
-  font-size: 0.8rem;
-  color: #94a3b8;
-}
-
-.empty {
-  text-align: center;
-  color: #94a3b8;
-  padding: 2rem 0;
-  font-size: 0.9rem;
-}
-
-.group-block {
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 1rem 1.1rem;
-  margin-bottom: 1rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.group-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.group-title {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.group-name {
-  font-weight: 600;
-  color: #0f172a;
-  font-size: 1rem;
-}
-
-.badge {
-  background: #eff6ff;
-  color: var(--color-primary);
-  font-size: 0.75rem;
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-}
-
-.group-actions {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.major-area {
-  margin-top: 0.85rem;
-}
-
-.major-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.major-title {
-  font-size: 0.85rem;
-  color: #64748b;
-}
-
-.major-empty {
-  font-size: 0.85rem;
-  color: #94a3b8;
-  padding: 0.5rem 0;
-}
-
-.major-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.major-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 0.4rem 0.7rem;
-  font-size: 0.85rem;
-}
-
-.major-name {
-  color: #1e293b;
-}
-
-.major-quota {
-  color: #64748b;
-}
-
-.icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: #64748b;
-  padding: 0.15rem;
-
-  &:hover {
-    color: var(--color-primary);
-  }
-
-  &-danger:hover {
-    color: #dc2626;
-  }
-}
-
-// ===== 弹窗 =====
-.modal-mask {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-}
-
-.modal {
-  background: #fff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  width: 90%;
-  max-width: 420px;
-}
-
-.modal-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #0f172a;
-  margin-bottom: 1rem;
-}
-
-.form-row {
-  margin-bottom: 0.9rem;
-}
-
-.form-label {
-  display: block;
-  font-size: 0.85rem;
-  color: #475569;
-  margin-bottom: 0.3rem;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-// ===== 通用表单 =====
-.input {
-  width: 100%;
-  padding: 0.5rem 0.7rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  outline: none;
-
-  &:focus {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-  }
-
-  &-sm {
-    width: 90px;
-  }
-}
-
-// ===== 按钮 =====
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: all 0.15s;
-
-  &-sm {
-    padding: 0.4rem 0.85rem;
-    font-size: 0.85rem;
-  }
-
-  &-xs {
-    padding: 0.25rem 0.6rem;
-    font-size: 0.8rem;
-  }
-
-  &-primary {
-    background: var(--color-primary);
-    color: #fff;
-
-    &:hover {
-      background: #1d4ed8;
-    }
-  }
-
-  &-outline {
-    background: #fff;
-    color: #334155;
-    border: 1px solid #cbd5e1;
-
-    &:hover {
-      background: #f8fafc;
-    }
-  }
-
-  &-danger-outline {
-    background: #fff;
-    color: #dc2626;
-    border: 1px solid #fecaca;
-
-    &:hover {
-      background: #fef2f2;
-    }
-  }
-}
-
-/* ===== 移动端 (<768px) ===== */
-@media (max-width: 768px) {
-  .title {
-    font-size: 1.25rem;
-  }
-
-  /* 规则行：窄屏允许换行，避免 hint 文字挤压 */
-  .rule-row {
-    flex-wrap: wrap;
-  }
-
-  /* 卡片内边距收窄 */
-  .card-header {
-    padding: 0.85rem 1rem;
-  }
-
-  .card-body {
-    padding: 1rem;
-  }
-
-  /* 学校卡片内边距收窄 */
-  .group-block {
-    padding: 0.85rem 0.9rem;
-  }
-}
-</style>

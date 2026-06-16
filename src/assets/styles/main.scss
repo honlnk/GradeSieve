@@ -48,3 +48,116 @@ body {
     height: 4px;
   }
 }
+
+/* ============================================================
+ * 通用组件类（跨页面复用，消除各视图重复定义）
+ * 在 components 层定义，可被 utilities 层的工具类覆盖
+ * ============================================================ */
+@layer components {
+  /* ---- 按钮 ---- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2
+           text-sm font-medium no-underline transition-all cursor-pointer border-0;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+  }
+
+  .btn-outline {
+    @apply bg-white text-slate-700 border border-slate-300 hover:bg-slate-50;
+  }
+
+  .btn-danger-outline {
+    @apply bg-white text-red-600 border border-red-200 hover:bg-red-50;
+  }
+
+  .btn-sm {
+    @apply px-3.5 py-1.5 text-[0.85rem];
+  }
+
+  .btn-xs {
+    @apply px-2.5 py-1 text-xs;
+  }
+
+  /* 按钮 disabled 态 */
+  .btn:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+  .btn-primary:disabled {
+    @apply hover:bg-blue-600;
+  }
+  .btn-outline:disabled {
+    @apply hover:bg-white;
+  }
+
+  /* ---- 输入框：标准表单（ConfigView 用）---- */
+  .input {
+    @apply w-full px-[0.7rem] py-2 rounded-lg border border-slate-300
+           text-[0.9rem] outline-none bg-white
+           focus:border-blue-600 focus:ring-[3px] focus:ring-blue-600/15;
+  }
+
+  /* ---- 输入框：紧凑筛选（DataView 用）---- */
+  .input-compact {
+    @apply w-auto min-w-[120px] px-[0.65rem] py-[0.45rem] rounded-md
+           border border-slate-300 text-[0.88rem] outline-none bg-white
+           focus:border-blue-600 focus:ring-[3px] focus:ring-blue-600/15
+           max-md:min-w-[100px];
+  }
+
+  /* ---- 卡片 ---- */
+  .card {
+    @apply bg-white border border-slate-200 rounded-xl mb-5 overflow-hidden;
+  }
+
+  .card-header {
+    @apply flex items-center justify-between px-5 py-4
+           border-b border-slate-100 max-md:px-4;
+  }
+
+  .card-title {
+    @apply text-[1.05rem] font-semibold text-slate-900 m-0;
+  }
+
+  .card-body {
+    @apply p-5 max-md:p-4;
+  }
+
+  /* ---- 徽章 ---- */
+  .badge {
+    @apply bg-blue-50 text-blue-600 text-xs px-2 py-[0.15rem] rounded-full;
+  }
+
+  /* ---- 状态标签（录取/候补/不达标）---- */
+  .tag {
+    @apply inline-block px-2 py-[0.15rem] rounded-full text-xs font-medium;
+  }
+
+  .tag-green {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .tag-orange {
+    @apply bg-orange-100 text-orange-900;
+  }
+
+  .tag-gray {
+    @apply bg-slate-100 text-slate-500;
+  }
+
+  /* ---- 图标按钮 ---- */
+  .icon-btn {
+    @apply inline-flex items-center justify-center border-0 bg-transparent
+           cursor-pointer text-slate-500 p-[0.15rem] hover:text-blue-600;
+  }
+
+  .icon-btn-danger {
+    @apply hover:text-red-600;
+  }
+
+  /* ---- 顶部导航激活态（Vue Router 自动加 .router-link-active）---- */
+  .nav-link.router-link-active {
+    @apply bg-blue-600 text-white;
+  }
+}
