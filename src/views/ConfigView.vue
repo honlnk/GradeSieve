@@ -101,7 +101,7 @@
     </section>
 
     <!-- 学校编辑弹窗 -->
-    <div v-if="groupDialog.visible" class="modal-mask" @click.self="groupDialog.visible = false">
+    <div v-if="groupDialog.visible" class="modal-mask" @mousedown.self="groupDialog.visible = false">
       <div class="modal">
         <div class="modal-title">
           {{ groupDialog.id ? '编辑学校' : '新增学校' }}
@@ -133,7 +133,7 @@
     </div>
 
     <!-- 专业编辑弹窗 -->
-    <div v-if="majorDialog.visible" class="modal-mask" @click.self="majorDialog.visible = false">
+    <div v-if="majorDialog.visible" class="modal-mask" @mousedown.self="majorDialog.visible = false">
       <div class="modal">
         <div class="modal-title">
           {{ majorDialog.id ? '编辑专业' : '新增专业' }}
