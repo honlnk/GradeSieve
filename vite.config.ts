@@ -7,6 +7,9 @@ export default defineConfig(() => ({
   // 本地开发与自定义域名（根路径）用 '/'；
   // 若部署在子路径下，通过 BASE_PATH 注入前缀（如 /GradeSieve/）。
   base: process.env.BASE_PATH ?? '/',
+  server: {
+    port: 8989,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
