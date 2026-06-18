@@ -18,10 +18,10 @@ const routes = [
     meta: { title: '数据展示' },
   },
   {
-    path: '/config',
-    name: 'config',
-    component: () => import('@/views/ConfigView.vue'),
-    meta: { title: '招生配置' },
+    path: '/plan',
+    name: 'plan',
+    component: () => import('@/views/PlanView.vue'),
+    meta: { title: '招生计划' },
   },
 ]
 

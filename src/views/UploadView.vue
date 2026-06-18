@@ -2,7 +2,9 @@
   <div class="max-w-[760px] mx-auto">
     <h1 class="text-[1.5rem] font-bold text-slate-900 mb-1">数据导入</h1>
     <p class="text-slate-500 text-sm mb-6">
-      上传一份完整的考生成绩表（.xlsx / .csv）。导入后会覆盖本地现有数据。
+      上传包含三张工作表的汇总文件（.xls / .xlsx）：<br />
+      <span class="text-slate-400">表1 同报志愿名单、表2 普高拟录取名单、表3 招生计划。</span>
+      导入后会覆盖本地现有数据。
     </p>
 
     <div
@@ -20,7 +22,7 @@
       <input
         ref="fileInput"
         type="file"
-        accept=".xlsx,.xls,.csv"
+        accept=".xlsx,.xls"
         class="hidden"
         @change="onPick"
       />
@@ -29,13 +31,13 @@
           <Icon name="upload" :size="40" :stroke-width="1.5" />
         </div>
         <div class="text-base text-slate-700">点击选择文件，或拖拽文件到此处</div>
-        <div class="text-xs text-slate-400">支持 .xlsx / .xls / .csv</div>
+        <div class="text-xs text-slate-400">支持 .xls / .xlsx（含三张表）</div>
       </div>
       <div v-else class="flex flex-col items-center gap-2">
         <div
           class="h-7 w-7 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin"
         />
-        <div class="text-base text-slate-700">正在导入...</div>
+        <div class="text-base text-slate-700">正在解析三表数据...</div>
       </div>
     </div>
 
@@ -52,46 +54,76 @@
     </div>
 
     <div
-      v-if="missingFields.length"
+      v-if="errors.length"
       class="mt-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-[0.85rem] text-amber-700"
     >
       <div class="font-semibold flex items-center gap-1.5">
-        <Icon name="alert" :size="16" /> 以下行存在问题（已用默认值填充）：
+        <Icon name="alert" :size="16" /> 解析时发现以下问题：
       </div>
       <ul class="mt-2 pl-5">
-        <li v-for="(w, i) in missingFields.slice(0, 10)" :key="i" class="my-[0.15rem]">
-          {{ w }}
-        </li>
+        <li v-for="(w, i) in errors" :key="i" class="my-[0.15rem]">{{ w }}</li>
       </ul>
-      <div v-if="missingFields.length > 10" class="mt-1 text-amber-600">
-        ……共 {{ missingFields.length }} 处
+    </div>
+
+    <!-- 导入摘要 -->
+    <div
+      v-if="summary"
+      class="mt-6 p-5 bg-white border border-slate-200 rounded-[10px]"
+    >
+      <div class="text-xs text-slate-500 mb-3">本次导入</div>
+      <div class="grid grid-cols-3 gap-4 text-center max-md:grid-cols-3 max-md:gap-2">
+        <div>
+          <div class="text-[1.6rem] font-bold text-slate-900">
+            {{ summary.applicants }}
+          </div>
+          <div class="text-xs text-slate-500 mt-1">表1 报考</div>
+        </div>
+        <div>
+          <div class="text-[1.6rem] font-bold text-slate-900">
+            {{ summary.admitted }}
+          </div>
+          <div class="text-xs text-slate-500 mt-1">表2 普高录取</div>
+        </div>
+        <div>
+          <div class="text-[1.6rem] font-bold text-slate-900">
+            {{ summary.schools }}
+          </div>
+          <div class="text-xs text-slate-500 mt-1">表3 招生校</div>
+        </div>
+      </div>
+      <div class="mt-5 flex gap-3 flex-wrap">
+        <RouterLink to="/data" class="btn btn-primary">查看录取结果 →</RouterLink>
+        <RouterLink to="/plan" class="btn btn-outline">招生计划</RouterLink>
       </div>
     </div>
 
+    <!-- 已有数据时显示清空入口 -->
     <div
-      v-if="studentStore.count > 0"
+      v-else-if="dataStore.hasData"
       class="mt-6 p-5 bg-white border border-slate-200 rounded-[10px]"
     >
       <div class="flex items-center justify-between gap-4">
         <div>
           <div class="text-xs text-slate-500">当前本地数据</div>
           <div class="text-base font-semibold text-slate-900 mt-[0.15rem]">
-            {{ studentStore.count }} 条考生记录
+            表1 {{ dataStore.applicants.length }} 人 · 表3
+            {{ dataStore.schools.length }} 校
           </div>
         </div>
         <button class="btn btn-danger-outline" @click="onClear">清空本地数据</button>
       </div>
       <div class="mt-4 flex gap-3 flex-wrap">
-        <RouterLink to="/data" class="btn btn-primary">查看数据 →</RouterLink>
-        <RouterLink to="/config" class="btn btn-outline">前往配置</RouterLink>
+        <RouterLink to="/data" class="btn btn-primary">查看录取结果 →</RouterLink>
+        <RouterLink to="/plan" class="btn btn-outline">招生计划</RouterLink>
       </div>
     </div>
 
     <div class="mt-6 px-4 py-3 bg-slate-100 rounded-lg text-[0.85rem] text-slate-600">
-      <div class="font-medium">期望的表头格式：</div>
-      <code class="block mt-1.5 text-slate-900 break-all">
-        排名、姓名、性别、年龄、总分、语文、数学、英语、身份证号、考号
-      </code>
+      <div class="font-medium">工作簿需包含三张表：</div>
+      <ul class="mt-1.5 pl-5 list-disc">
+        <li>表1 / 表2 列：序号、区县、就读学校、报名号、姓名、性别、身份证号、民族、学籍号、普高1、普高2、职教高考班、3+4志愿学校、语文、数学、英语、物理、化学</li>
+        <li>表3 列：学校名称、计划数</li>
+      </ul>
     </div>
   </div>
 </template>
@@ -99,18 +131,21 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useStudentStore } from '@/stores/student'
-import { parseStudentsFromBuffer } from '@/utils/excel'
+import { useDataStore } from '@/stores/data'
+import { parseWorkbook } from '@/utils/excel'
 import Icon from '@/components/Icon.vue'
 
-const studentStore = useStudentStore()
+const dataStore = useDataStore()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const dragging = ref(false)
 const importing = ref(false)
 const message = ref('')
 const messageType = ref<'success' | 'error'>('success')
-const missingFields = ref<string[]>([])
+const errors = ref<string[]>([])
+const summary = ref<{ applicants: number; admitted: number; schools: number } | null>(
+  null,
+)
 
 function triggerPick() {
   if (importing.value) return
@@ -131,19 +166,28 @@ function onDrop(e: DragEvent) {
 async function handleFile(file: File) {
   importing.value = true
   message.value = ''
-  missingFields.value = []
+  errors.value = []
+  summary.value = null
   try {
     const buf = await file.arrayBuffer()
-    const { students, missingFields: mf } = parseStudentsFromBuffer(buf)
-    if (!students.length) {
-      message.value = '未解析到任何数据，请检查文件内容。'
+    const parsed = parseWorkbook(buf)
+
+    if (!parsed.applicants.length && !parsed.schools.length) {
+      message.value = '未解析到任何数据，请检查文件内容是否包含三张表。'
       messageType.value = 'error'
       return
     }
-    await studentStore.replaceAll(students)
-    missingFields.value = mf
-    message.value = `成功导入 ${students.length} 条记录。`
+
+    await dataStore.replaceAll(parsed)
+
+    summary.value = {
+      applicants: parsed.applicants.length,
+      admitted: parsed.admitted.length,
+      schools: parsed.schools.length,
+    }
+    message.value = `成功导入：表1 ${parsed.applicants.length} 人 / 表2 ${parsed.admitted.length} 人 / 表3 ${parsed.schools.length} 校。`
     messageType.value = 'success'
+    if (parsed.errors.length) errors.value = parsed.errors
   } catch (err) {
     console.error(err)
     message.value = `导入失败：${(err as Error).message}`
@@ -155,9 +199,10 @@ async function handleFile(file: File) {
 }
 
 async function onClear() {
-  if (!confirm('确定要清空本地全部考生数据吗？此操作不可撤销。')) return
-  await studentStore.clear()
+  if (!confirm('确定要清空本地全部数据吗？此操作不可撤销。')) return
+  await dataStore.clearAll()
   message.value = '已清空本地数据。'
   messageType.value = 'success'
+  summary.value = null
 }
 </script>

@@ -1,32 +1,22 @@
-import type { Major, ScoreRule, Student } from '@/types'
+import type {
+  AdmitResult,
+  AdmissionStats,
+  Applicant,
+  Rule,
+  School,
+} from '@/types'
 
 /**
- * 过滤掉总分不达标的考生。
- * @param students 全部考生
- * @param minTotalScore 总分下限（含）
+ * 按多级优先级降序排序（不修改原数组）。
+ * @param list 待排序列表
+ * @param sortPriority 排序字段优先级（按数组顺序），空则回退到 threeScoreTotal
  */
-export function filterByScore(
-  students: Student[],
-  minTotalScore: number,
-): Student[] {
-  return students.filter((s) => Number(s.totalScore) >= minTotalScore)
-}
-
-/**
- * 按多级优先级降序排序。
- * @param students 考生列表
- * @param sortPriority 排序字段优先级（按数组顺序）
- * @returns 新数组（不修改原数组）
- */
-export function sortByPriority(
-  students: Student[],
-  sortPriority: string[],
-): Student[] {
-  const fields = sortPriority.length ? sortPriority : ['totalScore']
-  return [...students].sort((a, b) => {
+export function sortByPriority<T>(list: T[], sortPriority: string[]): T[] {
+  const fields = sortPriority.length ? sortPriority : ['threeScoreTotal']
+  return [...list].sort((a, b) => {
     for (const field of fields) {
-      const av = Number((a as any)[field]) || 0
-      const bv = Number((b as any)[field]) || 0
+      const av = Number((a as Record<string, unknown>)[field]) || 0
+      const bv = Number((b as Record<string, unknown>)[field]) || 0
       if (av !== bv) return bv - av // 降序
     }
     return 0
@@ -34,49 +24,127 @@ export function sortByPriority(
 }
 
 /**
- * 单个考生的录取结果
- */
-export interface AdmissionResult {
-  student: Student
-  /** 该考生在所属分组内的名次（从 1 开始） */
-  rank: number
-  /** 录取到的专业（按方案 A：仅按学校总名额截取，专业为展示） */
-  major?: Major
-  /** 是否被录取（在目标人数内） */
-  admitted: boolean
-}
-
-/**
- * 对单个分组进行录取分配（方案 A）。
+ * 三表录取主流程（纯函数）。
  *
- * 规则：
- * 1. 先过滤总分下限；
- * 2. 按多级排序得出名次；
- * 3. 在分组目标人数内截取，超出的标记为未录取。
+ * 算法：
+ * 1. 表1 − 表2：身份证号在普高录取集合中的考生直接剔除（eliminatedReason = 'high-school'）；
+ * 2. 剩余考生过语数外门槛（< minThreeScore 剔除，reason = 'score'）；
+ * 3. 按志愿学校代码（vocationalCode）分组；
+ * 4. 每组内按 sortPriority 降序，前 quota 名录取，其余候补（reason = 'overflow'）。
  *
- * 注：考生数据表无专业志愿字段，专业名额仅作统计展示，
- * 不参与实际分配。若后续需要按志愿匹配，再扩展此函数。
+ * @param applicants 表1 全量报考考生
+ * @param admittedIdCards 表2 普高已录取的身份证号集合
+ * @param schools 表3 招生计划
+ * @param rule 录取规则（门槛 + 排序优先级）
  */
-export function admitGroup(
-  students: Student[],
-  rule: Pick<ScoreRule, 'minTotalScore' | 'sortPriority'>,
-  targetCount: number,
-  majors: Major[] = [],
-): AdmissionResult[] {
-  const passed = filterByScore(students, rule.minTotalScore)
-  const sorted = sortByPriority(passed, rule.sortPriority)
+export function runAdmission(
+  applicants: Applicant[],
+  admittedIdCards: Set<string>,
+  schools: School[],
+  rule: Pick<Rule, 'minThreeScore' | 'sortPriority'>,
+): {
+  results: AdmitResult[]
+  bySchool: Map<string, AdmitResult[]>
+  stats: AdmissionStats
+} {
+  const minScore = rule.minThreeScore
+  const schoolByCode = new Map<string, School>()
+  for (const s of schools) schoolByCode.set(s.code, s)
 
-  // 简单地把专业名额平铺成一个录取序列（仅用于展示分配到哪个专业）
-  const majorSlots: Major[] = []
-  for (const m of majors) {
-    const count = Math.max(0, Number(m.quota) || 0)
-    for (let i = 0; i < count; i++) majorSlots.push(m)
+  // 分组：vocationalCode -> 达标考生（未在普高录取名单、且语数外达标）
+  const grouped = new Map<string, Applicant[]>()
+  const results: AdmitResult[] = []
+
+  let removedByHighSchool = 0
+  let removedByScore = 0
+
+  for (const a of applicants) {
+    const code = a.vocationalCode ?? ''
+    const school = schoolByCode.get(code)
+    const schoolName = school?.name ?? a.vocationalSchool ?? code
+
+    // 1. 已被普高录取 → 剔除
+    if (admittedIdCards.has(a.idCard)) {
+      removedByHighSchool++
+      results.push({
+        applicant: a,
+        schoolCode: code,
+        schoolName,
+        rank: 0,
+        admitted: false,
+        eliminatedReason: 'high-school',
+      })
+      continue
+    }
+
+    // 2. 语数外不达标 → 剔除
+    if (Number(a.threeScoreTotal) < minScore) {
+      removedByScore++
+      results.push({
+        applicant: a,
+        schoolCode: code,
+        schoolName,
+        rank: 0,
+        admitted: false,
+        eliminatedReason: 'score',
+      })
+      continue
+    }
+
+    // 3. 入组（志愿学校无论是否在表3 中都入组，统计时体现）
+    if (!grouped.has(code)) grouped.set(code, [])
+    grouped.get(code)!.push(a)
   }
 
-  return sorted.map((student, idx) => {
-    const rank = idx + 1
-    const admitted = rank <= targetCount
-    const major = admitted ? majorSlots[idx] : undefined
-    return { student, rank, major, admitted }
+  // 4. 每组排序 + 按计划数截取
+  const bySchool = new Map<string, AdmitResult[]>()
+  let admittedTotal = 0
+  let overflowTotal = 0
+
+  for (const [code, list] of grouped) {
+    const school = schoolByCode.get(code)
+    const schoolName = school?.name ?? list[0]?.vocationalSchool ?? code
+    const quota = school ? Math.max(0, Number(school.quota) || 0) : 0
+
+    const sorted = sortByPriority(list, rule.sortPriority)
+    const groupResults: AdmitResult[] = sorted.map((applicant, idx) => {
+      const rank = idx + 1
+      const admitted = rank <= quota
+      if (admitted) admittedTotal++
+      else overflowTotal++
+      return {
+        applicant,
+        schoolCode: code,
+        schoolName,
+        rank,
+        admitted,
+        eliminatedReason: admitted ? undefined : 'overflow',
+      }
+    })
+    bySchool.set(code, groupResults)
+    results.push(...groupResults)
+  }
+
+  // 学校维度统计（以表3 学校为准，含计划为 0 或无候选的也在列）
+  const schoolStats = schools.map((s) => {
+    const list = bySchool.get(s.code) ?? []
+    return {
+      code: s.code,
+      name: s.name,
+      quota: s.quota,
+      admitted: list.filter((r) => r.admitted).length,
+      candidates: list.length,
+    }
   })
+
+  const stats: AdmissionStats = {
+    total: applicants.length,
+    removedByHighSchool,
+    removedByScore,
+    admitted: admittedTotal,
+    overflow: overflowTotal,
+    schools: schoolStats,
+  }
+
+  return { results, bySchool, stats }
 }

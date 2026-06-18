@@ -91,7 +91,7 @@ body {
     @apply hover:bg-white;
   }
 
-  /* ---- 输入框：标准表单（ConfigView 用）---- */
+  /* ---- 输入框：标准表单 ---- */
   .input {
     @apply w-full px-[0.7rem] py-2 rounded-lg border border-slate-300
            text-[0.9rem] outline-none bg-white

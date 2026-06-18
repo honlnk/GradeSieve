@@ -16,9 +16,9 @@
         </span>
       </div>
       <nav class="flex gap-1 max-md:gap-0.5">
-        <RouterLink to="/data" class="nav-link">数据展示</RouterLink>
+        <RouterLink to="/data" class="nav-link">录取结果</RouterLink>
         <RouterLink to="/upload" class="nav-link">数据导入</RouterLink>
-        <RouterLink to="/config" class="nav-link">招生配置</RouterLink>
+        <RouterLink to="/plan" class="nav-link">招生计划</RouterLink>
       </nav>
     </div>
   </header>
